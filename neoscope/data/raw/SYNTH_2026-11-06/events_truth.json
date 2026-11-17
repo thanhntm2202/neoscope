@@ -1,0 +1,85 @@
+{
+  "synthetic": true,
+  "events": [
+    {
+      "type": "DEPTH_EVAPORATION",
+      "symbol": "VCB",
+      "start_ts": "2026-11-06T10:39:35+07:00",
+      "end_ts": "2026-11-06T10:44:00+07:00",
+      "start_step": 1015,
+      "end_step": 1068,
+      "direction": -1,
+      "synthetic": true
+    },
+    {
+      "type": "DEPTH_EVAPORATION",
+      "symbol": "DIG",
+      "start_ts": "2026-11-06T14:19:25+07:00",
+      "end_ts": "2026-11-06T14:25:35+07:00",
+      "start_step": 2573,
+      "end_step": 2647,
+      "direction": -1,
+      "synthetic": true
+    },
+    {
+      "type": "TRADE_BURST",
+      "symbol": "HPG",
+      "start_ts": "2026-11-06T11:26:30+07:00",
+      "end_ts": "2026-11-06T11:29:00+07:00",
+      "start_step": 1578,
+      "end_step": 1608,
+      "direction": 1,
+      "synthetic": true
+    },
+    {
+      "type": "TRADE_BURST",
+      "symbol": "HCM",
+      "start_ts": "2026-11-06T13:04:50+07:00",
+      "end_ts": "2026-11-06T13:06:25+07:00",
+      "start_step": 1678,
+      "end_step": 1697,
+      "direction": -1,
+      "synthetic": true
+    },
+    {
+      "type": "FLASH_MOVE",
+      "symbol": "PDR",
+      "start_ts": "2026-11-06T11:28:45+07:00",
+      "end_ts": "2026-11-06T11:29:40+07:00",
+      "start_step": 1605,
+      "end_step": 1616,
+      "direction": -1,
+      "synthetic": true
+    },
+    {
+      "type": "FOREIGN_BURST",
+      "symbol": "PDR",
+      "start_ts": "2026-11-06T13:06:40+07:00",
+      "end_ts": "2026-11-06T13:07:30+07:00",
+      "start_step": 1700,
+      "end_step": 1710,
+      "direction": 1,
+      "synthetic": true
+    },
+    {
+      "type": "FOREIGN_BURST",
+      "symbol": "FPT",
+      "start_ts": "2026-11-06T11:21:55+07:00",
+      "end_ts": "2026-11-06T11:22:25+07:00",
+      "start_step": 1523,
+      "end_step": 1529,
+      "direction": -1,
+      "synthetic": true
+    }
+  ],
+  "gaps": {
+    "NLG": [
+      1484,
+      1489
+    ],
+    "FPT": [
+      2017,
+      2024
+    ]
+  }
+}

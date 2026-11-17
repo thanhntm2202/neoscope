@@ -1,0 +1,86 @@
+# =====================================================================
+# NeoScope settings — mọi "con số ma thuật" của hệ thống đều nằm ở đây
+# và được biện giải trong docs/thresholds.md (không ngưỡng tùy ý).
+# =====================================================================
+mode: SYNTHETIC            # SYNTHETIC | LIVE (LIVE cần .env + IP đã đăng ký với VPBankS)
+timezone: Asia/Ho_Chi_Minh
+
+paths:
+  data_dir: data
+  results_dir: data/results
+  sample_dir: data_sample
+
+neo_api:
+  auth_url: https://external.vpbanks.com.vn/auth/token
+  base_url: https://neoapi.vpbanks.com.vn/neo-api/
+  ws_url: ws://neoapi.vpbanks.com.vn/stock-stream/broker
+  rate_limit_rps: 5          # giới hạn cứng của NEO API (docs overview)
+  device_type: Chrome
+  ws_watchdog_s: 45          # không thấy thông điệp trong phiên -> tái kết nối
+  rest_timeout_s: 15
+
+watchlist:
+  large: [HPG, VCB, FPT, SSI]   # nhóm thanh khoản cao (VN30)
+  thin:  [PDR, DIG, NLG, HCM]   # nhóm thanh khoản mỏng hơn (midcap) — tương phản có chủ đích
+indices: [VNINDEX, VN30]
+
+synth:                        # chỉ dùng ở chế độ SYNTHETIC — luôn gắn nhãn công khai
+  seed: 20261117
+  n_sessions: 10
+  end_date: "2026-11-16"      # 10 ngày giao dịch gần nhất (không nghỉ lễ)
+  snapshot_interval_s: 5
+  symbols:
+    HPG: {ref: 29850,  adv_shares: 9000000,  depth_base: 120000, sigma_daily_bps: 210, kappa_obi_bps: 0.9, foreign_intensity: 1.0}
+    VCB: {ref: 62000,  adv_shares: 2500000,  depth_base: 60000,  sigma_daily_bps: 160, kappa_obi_bps: 0.7, foreign_intensity: 0.8}
+    FPT: {ref: 132000, adv_shares: 3000000,  depth_base: 45000,  sigma_daily_bps: 230, kappa_obi_bps: 0.9, foreign_intensity: 1.2}
+    SSI: {ref: 34500,  adv_shares: 8000000,  depth_base: 110000, sigma_daily_bps: 260, kappa_obi_bps: 1.0, foreign_intensity: 0.9}
+    PDR: {ref: 22400,  adv_shares: 3500000,  depth_base: 26000,  sigma_daily_bps: 330, kappa_obi_bps: 1.6, foreign_intensity: 0.25}
+    DIG: {ref: 19850,  adv_shares: 4500000,  depth_base: 30000,  sigma_daily_bps: 350, kappa_obi_bps: 1.7, foreign_intensity: 0.2}
+    NLG: {ref: 31200,  adv_shares: 1800000,  depth_base: 16000,  sigma_daily_bps: 300, kappa_obi_bps: 1.5, foreign_intensity: 0.3}
+    HCM: {ref: 27300,  adv_shares: 2200000,  depth_base: 19000,  sigma_daily_bps: 290, kappa_obi_bps: 1.5, foreign_intensity: 0.35}
+  traps:                      # mô phỏng đúng các "bẫy" đã xác nhận trong payload mẫu NEO docs
+    null_total_qty_p: 0.08    # totalBidQTTY/totalAskQTTY = null (thấy trong payload HPG mẫu)
+    duplicate_p: 0.004        # thông điệp lặp
+    out_of_order_p: 0.004     # đến không đúng thứ tự
+    late_p: 0.003             # đến muộn 3–10s
+    missing_field_p: 0.002    # thiếu trường mức 3
+    gap_events_per_session: 2 # "mất kết nối" 20–60s
+  events:                     # sự kiện ground-truth (ghi log để chấm precision/recall cảnh báo)
+    evap_per_session: 2       # bốc hơi độ sâu
+    burst_per_session: 2      # bùng nổ khối lượng
+    flash_per_session: 1      # nhảy giá nhanh rồi hồi một phần
+    foreign_burst_per_session: 2
+
+quality:
+  stale_gap_s: 30             # khoảng trống dữ liệu trong phiên LO bị coi là bất thường
+  dedup_window: 5             # cửa sổ (bản ghi) khử lặp theo hash payload
+
+bars:
+  freq_s: 60
+
+alerts:
+  bucket_min: 15              # chuẩn hóa theo giờ-trong-phiên (thanh khoản hình chữ U nội ngày)
+  z_threshold: 3.0            # |z| >= 3 VÀ vượt phân vị 99% VÀ dai dẳng >= 3 tick
+  pct_threshold: 0.99
+  persistence_n: 3
+  cooldown_s: 60
+  warmup_sessions: 1          # phiên đầu chỉ tích lũy baseline, không cảnh báo
+  types: [SPREAD_WIDEN, DEPTH_EVAPORATION, OBI_EXTREME, TRADE_BURST, FOREIGN_BURST]
+
+execution:
+  participation_rate: 0.15    # lệnh mô phỏng hấp thụ tối đa 15% KL khớp mỗi nhịp (giả định công bố)
+  horizon_s: 180              # chân trời thực thi 3 phút; phần chưa khớp định giá theo mid cuối
+  pi_z: 1.6449                # z 90% hai phía
+  fee_rate: 0.0015            # phí môi giới giả định 0.15% (cấu hình được, dải phổ biến 0.1–0.35%)
+  sell_tax_rate: 0.001        # thuế TNCN chuyển nhượng CK 0.1% giá bán (luật VN hiện hành)
+  order_sizes_vnd: [50000000, 2000000000]
+  orders_per_symbol_session: 30
+
+validation:
+  min_train_sessions: 5       # walk-forward: train 1..k, test k+1, k = 5..9
+  bootstrap_reps: 2000        # bootstrap theo cụm PHIÊN (không theo lệnh — tránh giả độc lập)
+  bootstrap_seed: 7
+
+lhs:
+  weights: {tightness: 1.0, depth: 1.0, immediacy: 1.0, stability: 1.0, balance: 1.0}
+  trailing_min: 15

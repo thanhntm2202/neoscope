@@ -1,0 +1,2 @@
+[console_scripts]
+neoscope = neoscope.cli:main
